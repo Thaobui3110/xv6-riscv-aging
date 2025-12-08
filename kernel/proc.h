@@ -84,6 +84,19 @@ enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 // Per-process state
 struct proc {
   struct spinlock lock;
+  
+///// --- Project: Aging & Starvation Detector ---//////////////////////
+  int rtime;        // total running time (in ticks)
+  int wtime;        // total time spent RUNNABLE (waiting for CPU)
+  int nrun;         // how many times this process has been scheduled
+
+  int priority;     // base / static priority (lower = higher priority)
+  int dyn_prio;     // dynamic priority used by PBS (after aging)
+
+  int starving;     // 1 if detected as starving, 0 otherwise
+  uint64 ctime;     // creation time in ticks (for FCFS & tie-breaking)
+  uint64 etime;     // nếu m cần time kết thúc, có thể thêm
+//////////////////////////////////////////////////////////////////////////////////
 
   // p->lock must be held when using these:
   enum procstate state;        // Process state

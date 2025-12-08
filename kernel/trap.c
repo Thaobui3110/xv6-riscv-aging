@@ -10,6 +10,7 @@ struct spinlock tickslock;
 uint ticks;
 
 extern char trampoline[], uservec[];
+extern struct proc proc[NPROC];    //thêm
 
 // in kernelvec.S, calls kerneltrap().
 void kernelvec();
@@ -42,35 +43,27 @@ usertrap(void)
   if((r_sstatus() & SSTATUS_SPP) != 0)
     panic("usertrap: not from user mode");
 
-  // send interrupts and exceptions to kerneltrap(),
-  // since we're now in the kernel.
-  w_stvec((uint64)kernelvec);  //DOC: kernelvec
+  w_stvec((uint64)kernelvec);
 
   struct proc *p = myproc();
-  
-  // save user program counter.
   p->trapframe->epc = r_sepc();
-  
-  if(r_scause() == 8){
-    // system call
 
+  if(r_scause() == 8){
     if(killed(p))
       kexit(-1);
 
-    // sepc points to the ecall instruction,
-    // but we want to return to the next instruction.
     p->trapframe->epc += 4;
-
-    // an interrupt will change sepc, scause, and sstatus,
-    // so enable only now that we're done with those registers.
     intr_on();
-
     syscall();
+
   } else if((which_dev = devintr()) != 0){
-    // ok
+    // device interrupt OK
+
   } else if((r_scause() == 15 || r_scause() == 13) &&
             vmfault(p->pagetable, r_stval(), (r_scause() == 13)? 1 : 0) != 0) {
+
     // page fault on lazily-allocated page
+
   } else {
     printf("usertrap(): unexpected scause 0x%lx pid=%d\n", r_scause(), p->pid);
     printf("            sepc=0x%lx stval=0x%lx\n", r_sepc(), r_stval());
@@ -80,18 +73,19 @@ usertrap(void)
   if(killed(p))
     kexit(-1);
 
-  // give up the CPU if this is a timer interrupt.
-  if(which_dev == 2)
-    yield();
+  // timer interrupt preemption control
+  if(which_dev == 2){
+#if SCHED_POLICY == SCHED_RR || SCHED_POLICY == SCHED_PBS
+    yield();  // preemptive in RR/PBS
+#endif
+  }
 
   prepare_return();
 
-  // the user page table to switch to, for trampoline.S
   uint64 satp = MAKE_SATP(p->pagetable);
-
-  // return to trampoline.S; satp value in a0.
   return satp;
 }
+
 
 //
 // set up trapframe and control registers for a return to user space
@@ -164,13 +158,29 @@ kerneltrap()
 void
 clockintr()
 {
-  if(cpuid() == 0){
+
+//1.////////////////////////////////// tạo update_aging() rồi gọi nó ở đây
+ if(cpuid() == 0){
     acquire(&tickslock);
     ticks++;
     wakeup(&ticks);
     release(&tickslock);
-  }
 
+    struct proc *p;
+    for(p = proc; p < &proc[NPROC]; p++){
+      acquire(&p->lock);
+      if(p->state == RUNNING){
+        p->rtime++;
+      } else if(p->state == RUNNABLE){
+        p->wtime++;
+        // 👉 chỉ cần gọi hàm aging_update, không làm logic aging trực tiếp ở đây nữa
+        aging_update(p);
+      }
+      release(&p->lock);
+    }
+  }
+  /////////////////////////////////////////////////////////////////////
+  
   // ask for the next timer interrupt. this also clears
   // the interrupt request. 1000000 is about a tenth
   // of a second.

@@ -13,3 +13,21 @@
 #define MAXPATH      128   // maximum file path name
 #define USERSTACK    1     // user stack pages
 
+#define AGING_THRESHOLD      50   // wtime > 50 ticks thì bắt đầu tăng priority
+#define STARVING_THRESHOLD   200  // wtime > 200 ticks coi là starvation
+#define AGING_STEP       1     // mỗi lần boost giảm priority 1
+#define MIN_PRIORITY         0
+#define MAX_PRIORITY         100  // tuỳ cách m định nghĩa
+#define DEBUG_AGING 1
+
+// week3 modification //
+#define SCHED_RR   0
+#define SCHED_FCFS 1
+#define SCHED_PBS  2
+#define SCHED_POLICY SCHED_FCFS  // tạm thời, sau đổi lại theo test
+
+#define DEFAULT_PRIORITY 60
+
+
+
+

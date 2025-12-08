@@ -24,6 +24,12 @@ int getpid(void);
 char* sys_sbrk(int,int);
 int pause(int);
 int uptime(void);
+int hello(void);
+int kalloc1(void);
+int psx(void);
+int ps(void);
+
+
 
 // ulib.c
 int stat(const char*, struct stat*);

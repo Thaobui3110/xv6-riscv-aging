@@ -107,3 +107,48 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_hello(void)
+{
+  struct proc *p = myproc();
+  printf("kernel: hello() called by pid %d (running in kernel)\n", p->pid);
+  return 0;
+}
+extern void* kalloc(void);
+extern void  kfree(void*);
+
+// 1) Allocate one kernel page, print, then free
+uint64
+sys_kalloc1(void)
+{
+  void *pa = kalloc();
+  if(pa == 0){
+    printf("kernel: kalloc1() failed: out of memory\n");
+    return -1;
+  }
+  printf("kernel: kalloc1() got page at %p, freeing it now\n", pa);
+  kfree(pa);
+  return 0;
+}
+
+
+// 2) Print process table
+uint64
+sys_psx(void)
+{
+  // procdump() đã có sẵn trong kernel/proc.c và được khai báo trong defs.h
+  procdump();
+  return 0;
+}
+
+///////////////////////////////
+extern void procdump(void);  // nếu compiler k nhận, thêm dòng này ở đầu file
+
+uint64
+sys_ps(void)
+{
+  procdump();
+  return 0;
+}
+

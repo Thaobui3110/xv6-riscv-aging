@@ -1,3 +1,8 @@
+/*
+week 2: thêm void aging_update
+        thêm priority, rtime, wtime,...
+*/
+
 #include "types.h"
 #include "param.h"
 #include "memlayout.h"
@@ -5,6 +10,18 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+
+// week3: forward declarations for scheduler variants
+#if SCHED_POLICY == SCHED_RR
+static void scheduler_rr_once(struct cpu *c);
+#elif SCHED_POLICY == SCHED_FCFS
+static void scheduler_fcfs_once(struct cpu *c);
+#elif SCHED_POLICY == SCHED_PBS
+static void scheduler_pbs_once(struct cpu *c);
+#endif
+
+extern uint ticks;
+////////////////////////////////////////////
 
 struct cpu cpus[NCPU];
 
@@ -124,7 +141,21 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
+  
+// --- Project: initialize time / priority tracking fields ---
+  p->rtime    = 0;
+  p->wtime    = 0;
+  p->nrun     = 0;
 
+  p->priority = DEFAULT_PRIORITY;   // hoặc một giá trị m chọn
+  p->dyn_prio = p->priority;        // dynamic priority bắt đầu bằng static priority
+
+  p->starving = 0;
+
+  p->ctime    = ticks;              // record creation time (for FCFS & tie-break)
+  // -----------------------------------------------------------
+  
+  
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
     freeproc(p);
@@ -148,6 +179,50 @@ found:
 
   return p;
 }
+
+
+//2./////////////////////////////////////////////////////////////////////////////////////
+void
+aging_update(struct proc *p)
+{
+  // Chỉ quan tâm process đang trong hàng chờ
+  if(p->state != RUNNABLE)
+    return;
+
+#ifdef DEBUG_AGING
+  int old_prio = p->priority;
+  int old_starving = p->starving;
+#endif
+
+  // Nếu chờ quá AGING_THRESHOLD → boost priority
+  if(p->wtime > AGING_THRESHOLD){
+    if(p->priority > MIN_PRIORITY){
+      p->priority -= AGING_STEP;
+      if(p->priority < MIN_PRIORITY)
+        p->priority = MIN_PRIORITY;
+    }
+    // reset wtime để lần sau phải chờ thêm 1 khoảng nữa mới được boost tiếp
+    p->wtime = 0;
+  }
+
+  // Nếu chờ quá STARVING_THRESHOLD → đánh dấu starving
+  if(p->wtime > STARVING_THRESHOLD){
+    p->starving = 1;
+  }
+
+#ifdef DEBUG_AGING
+  if(p->priority != old_prio){
+    printf("[AGING] pid=%d priority changed %d -> %d\n",
+           p->pid, old_prio, p->priority);
+  }
+  if(p->starving != old_starving && p->starving == 1){
+    printf("[STARVE] pid=%d is starving (wtime=%d)\n",
+           p->pid, p->wtime);
+  }
+#endif
+}
+
+////////////////////////////////////////////////////////////////////////////
 
 // free a proc structure and the data hanging from it,
 // including user pages.
@@ -421,6 +496,10 @@ kwait(uint64 addr)
 //  - swtch to start running that process.
 //  - eventually that process transfers control
 //    via swtch back to the scheduler.
+
+
+
+/* đây là void scheduler look like sau week2, bên dưới là thay đổi sau week3 dispatcher
 void
 scheduler(void)
 {
@@ -444,8 +523,18 @@ scheduler(void)
         // Switch to chosen process.  It is the process's job
         // to release its lock and then reacquire it
         // before jumping back to us.
+        
+        //1///////////////////// process chuẩn bị được chọn
+        p->wtime = 0;      // reset wait counter mỗi lần được chạy
+        p->starving = 0;   // hết đói
+        /////////////////////////
+        
         p->state = RUNNING;
+        
         c->proc = p;
+        //2////////////////// tăng ticks
+        p->nrun++;
+        ///////////////////////////
         swtch(&c->context, &p->context);
 
         // Process is done running for now.
@@ -461,6 +550,156 @@ scheduler(void)
     }
   }
 }
+*/
+
+
+// void scheduler week3 version
+void
+scheduler(void)
+{
+  struct cpu *c = mycpu();
+  c->proc = 0;
+
+  for(;;){
+    // tránh deadlock: cho phép interrupt
+    intr_on();
+
+#if SCHED_POLICY == SCHED_RR
+    scheduler_rr_once(c);
+#elif SCHED_POLICY == SCHED_FCFS
+    scheduler_fcfs_once(c);
+#elif SCHED_POLICY == SCHED_PBS
+    scheduler_pbs_once(c);
+#else
+# error "Unknown SCHED_POLICY"
+#endif
+  }
+}
+
+
+// One round of Round-Robin scheduling.
+// This is basically the old scheduler() body without the outer for(;;).
+#if SCHED_POLICY == SCHED_RR
+static void
+scheduler_rr_once(struct cpu *c)
+{
+  struct proc *p;
+
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+    if(p->state == RUNNABLE){
+      // nếu m có dùng nrun, rtime, wtime etc. thì tăng ở đây:
+      p->nrun++;              // nếu m đã thêm field nrun trong struct proc
+      p->wtime = 0;      // reset wait counter mỗi lần được chạy
+      p->starving = 0;  // hết đói, cứ đc chạy phát là reset starving
+
+      p->state = RUNNING;
+      c->proc = p;
+
+      swtch(&c->context, &p->context);
+
+      // process đã chạy xong một quãng thời gian (do yield/ sleep/ exit)
+      c->proc = 0;
+    }
+    release(&p->lock);
+  }
+}
+#endif
+
+
+// Temporary FCFS: pick the first RUNNABLE process in the table.
+// Later, we'll change this to pick process with smallest ctime.
+#if SCHED_POLICY == SCHED_FCFS
+static void
+scheduler_fcfs_once(struct cpu *c)
+{
+  struct proc *p;
+  struct proc *best = 0;
+
+  // Bước 1: tìm process RUNNABLE có ctime nhỏ nhất
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+    if(p->state == RUNNABLE){
+      if(best == 0){
+        // lần đầu gặp RUNNABLE
+        best = p;
+        // giữ lock của best, KHÔNG release ở đây
+      } else {
+        // so sánh ctime giữa p và best
+        if(p->ctime < best->ctime){
+          // p đến sớm hơn → chọn p làm best mới
+          release(&best->lock);   // bỏ lock của best cũ
+          best = p;               // giữ lock của p (best mới)
+        } else {
+          // best vẫn tốt hơn → bỏ p
+          release(&p->lock);
+        }
+      }
+    } else {
+      // không runnable → bỏ
+      release(&p->lock);
+    }
+  }
+
+  // Bước 2: nếu không có process RUNNABLE thì thôi
+  if(best == 0){
+    return;
+  }
+
+  // Bước 3: chạy process được chọn (best)
+  best->nrun++;        // đếm số lần được chọn
+  best->wtime = 0;     // reset thời gian chờ
+  best->starving = 0;  // hết đói
+
+  best->state = RUNNING;
+  c->proc = best;
+
+  swtch(&c->context, &best->context);
+
+  // quay lại scheduler
+  c->proc = 0;
+
+  // thả lock cuối cùng
+  release(&best->lock);
+}
+#endif
+
+
+
+// Temporary PBS: currently same as FCFS/RR placeholder.
+// Later, we'll implement proper priority-based selection.
+#if SCHED_POLICY == SCHED_PBS
+static void
+scheduler_pbs_once(struct cpu *c)
+{
+  struct proc *p;
+
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+    if(p->state == RUNNABLE){
+      p->nrun++;              // nếu có nrun
+      // về sau ta sẽ dùng p->dyn_prio, starving flag, tie-break, v.v.
+
+      p->state = RUNNING;
+      c->proc = p;
+
+      swtch(&c->context, &p->context);
+
+      c->proc = 0;
+      release(&p->lock);
+      return;
+    }
+    release(&p->lock);
+  }
+}
+#endif
+
+
+
+
+
+
+
 
 // Switch to scheduler.  Must hold only p->lock
 // and have changed proc->state. Saves and restores
@@ -662,7 +901,10 @@ either_copyin(void *dst, int user_src, uint64 src, uint64 len)
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.
 // No lock to avoid wedging a stuck machine further.
-void
+
+
+// code ban đầu/////////////////////////////////////////////////////
+/*void
 procdump(void)
 {
   static char *states[] = {
@@ -688,3 +930,43 @@ procdump(void)
     printf("\n");
   }
 }
+*/
+
+void
+procdump(void)
+{
+  static char *states[] = {
+  [UNUSED]   "unused",
+  [SLEEPING] "sleep",
+  [RUNNABLE] "runble",
+  [RUNNING]  "run",
+  [ZOMBIE]   "zombie"
+  };
+
+  struct proc *p;
+  char *state;
+
+  printf("\n");
+  printf("PID\tSTATE\tNAME\tPRIO\tRTIME\tWTIME\tNRUN\tSTARVING\n");
+
+  for(p = proc; p < &proc[NPROC]; p++){
+    if(p->state == UNUSED)
+      continue;
+
+    if(p->state >= 0 && p->state < NELEM(states) && states[p->state])
+      state = states[p->state];
+    else
+      state = "???";
+    printf("%d\t%s\t%s\t%d\t%d\t%d\t%d\t%d\n",
+           p->pid,
+           state,
+           p->name,
+           p->priority,
+           p->rtime,
+           p->wtime,
+           p->nrun,
+           p->starving);
+  }
+}
+
+

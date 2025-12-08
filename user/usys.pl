@@ -42,3 +42,10 @@ entry("getpid");
 entry("sbrk");
 entry("pause");
 entry("uptime");
+entry("hello");
+entry("kalloc1");
+entry("psx");
+entry("ps");
+
+ 
+
