@@ -146,7 +146,8 @@ found:
   p->rtime    = 0;
   p->wtime    = 0;
   p->nrun     = 0;
-
+  p->stime = 0;
+  
   p->priority = DEFAULT_PRIORITY;   // hoặc một giá trị m chọn
   p->dyn_prio = p->priority;        // dynamic priority bắt đầu bằng static priority
 

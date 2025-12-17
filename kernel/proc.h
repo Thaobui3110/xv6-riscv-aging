@@ -94,6 +94,7 @@ struct proc {
   int dyn_prio;     // dynamic priority used by PBS (after aging)
 
   int starving;     // 1 if detected as starving, 0 otherwise
+  int stime;   // time spent in SLEEPING state (ticks) //// ref
   uint64 ctime;     // creation time in ticks (for FCFS & tie-breaking)
   uint64 etime;     // nếu m cần time kết thúc, có thể thêm
 //////////////////////////////////////////////////////////////////////////////////
