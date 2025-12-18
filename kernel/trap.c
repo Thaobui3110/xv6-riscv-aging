@@ -76,8 +76,10 @@ usertrap(void)
   // timer interrupt preemption control
   if(which_dev == 2){
 #if SCHED_POLICY == SCHED_RR || SCHED_POLICY == SCHED_PBS
-    yield();  // preemptive in RR/PBS
+   yield();
 #endif
+
+
   }
 
   prepare_return();
@@ -169,16 +171,29 @@ clockintr()
     struct proc *p;
     for(p = proc; p < &proc[NPROC]; p++){
       acquire(&p->lock);
-      if(p->state == RUNNING){
-        p->rtime++;
-      } else if(p->state == RUNNABLE){
+      if(p->state == RUNNING) {
+      	p->rtime++;
+      	p->pbs_rtime++;
+      	// Debug: in ra thông tin khi process đang RUNNING
+        //cprintf("Process %d (RUNNING): rtime=%d, pbs_rtime=%d\n", p->pid, p->rtime, p->pbs_rtime);
+      	}
+      else if(p->state == RUNNABLE){
         p->wtime++;
+         // Debug: in ra thông tin khi process đang RUNNABLE
+        //cprintf("Process %d (RUNNABLE): wtime=%d\n", p->pid, p->wtime);
         // 👉 chỉ cần gọi hàm aging_update, không làm logic aging trực tiếp ở đây nữa
         aging_update(p);
       }
+      else if(p->state == SLEEPING) {
+      	p->stime++;
+      	p->pbs_stime++;
+      	 // Debug: in ra thông tin khi process đang RUNNABLE
+        //cprintf("Process %d (RUNNABLE): wtime=%d\n", p->pid, p->wtime);
+      	}
       release(&p->lock);
     }
   }
+
   /////////////////////////////////////////////////////////////////////
   
   // ask for the next timer interrupt. this also clears

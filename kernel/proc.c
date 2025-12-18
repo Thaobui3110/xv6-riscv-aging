@@ -136,12 +136,14 @@ found:
   p->wtime    = 0;
   p->nrun     = 0;
   p->stime = 0;
+  p->pbs_rtime = 0;  // Reset PBS run time
+  p->pbs_stime = 0;  // Reset PBS sleep time
   
-  p->priority = DEFAULT_PRIORITY;   // hoặc một giá trị m chọn
-  p->dyn_prio = p->priority;        // dynamic priority bắt đầu bằng static priority
+  p->priority = DEFAULT_PRIORITY;   // hoặc một giá trị m chọn, =60
+  //p->dyn_prio = p->priority;        // dynamic priority bắt đầu bằng static priority//
 
   p->starving = 0;
-
+  
   p->ctime    = ticks;              // record creation time (for FCFS & tie-break)
   // -----------------------------------------------------------
   
@@ -565,7 +567,7 @@ void scheduler(void)
         // before jumping back to us.
         p->state = RUNNING;
         c->proc = p;
-        p->numScheduled++;
+        p->nrun++;
         swtch(&c->context, &p->context);
         // Process is done running for now.
         // It should have changed its p->state before coming back.
@@ -614,21 +616,21 @@ void scheduler(void)
       int niceness = 5;  // Default value for niceness
 
       // Calculate niceness based on runTime and sleepTime
-      if (p->numScheduled) {
-        if (p->sleepTime + p->runTime != 0)
-          niceness = (int)((p->stime / (p->rtime + p->stime)) * 10);
+      if (p->nrun) {
+        if (p->pbs_stime + p->pbs_rtime != 0)
+          niceness = (int)((p->pbs_stime / (p->pbs_rtime + p->pbs_stime)) * 10);
         else
           niceness = 5;  // Default value if no time spent running or sleeping
       }
 
-      // Calculate dynamic priority (dp) based on niceness
-      int val = p->staticPriority - niceness + 5;
+      // Calculate dynamic priority (dp) based on niceness =>processDp = val/0/100 => so sánh với dp để chọn
+      int val = p->priority - niceness + 5;
       int tmp = val < 100 ? val : 100;
       int processDp = 0 > tmp ? 0 : tmp;
 
       // Tie-breaking rules (handle numScheduled and timeOfCreation)
-      int flag1 = (dp == processDp && p->numScheduled < process->numScheduled);
-      int flag2 = (dp == processDp && p->numScheduled == process->numScheduled && p->timeOfCreation < process->timeOfCreation);
+      int flag1 = (dp == processDp && p->nrun < process->nrun);
+      int flag2 = (dp == processDp && p->nrun == process->nrun && p->ctime < process->ctime);
 
       // Select process with the lowest dp or tie-breaking rules
       if (p->state == RUNNABLE) {
@@ -645,11 +647,11 @@ void scheduler(void)
     }
 
     if (process) {
-      process->numScheduled++;  // Increment number of times process has been scheduled
-      process->startTime = ticks;  // Set start time for the process
+      process->nrun++;  // Increment number of times process has been scheduled
+      process->ctime = ticks;  // Set start time for the process
       process->state = RUNNING;
-      process->runTime = 0;  // Reset run time at the start of the process
-      process->sleepTime = 0;  // Reset sleep time
+      process->pbs_rtime = 0;  // Reset run time at the start of the process
+      process->pbs_stime = 0;  // Reset sleep time
 
       c->proc = process;  // Set the current process
       swtch(&c->context, &process->context);  // Context switch to the selected process
@@ -664,11 +666,6 @@ void scheduler(void)
 
   }
 }
-
-
-
-
-
 
 
 
