@@ -11,17 +11,6 @@ week 2: thêm void aging_update
 #include "proc.h"
 #include "defs.h"
 
-// week3: forward declarations for scheduler variants
-#if SCHED_POLICY == SCHED_RR
-static void scheduler_rr_once(struct cpu *c);
-#elif SCHED_POLICY == SCHED_FCFS
-static void scheduler_fcfs_once(struct cpu *c);
-#elif SCHED_POLICY == SCHED_PBS
-static void scheduler_pbs_once(struct cpu *c);
-#endif
-
-extern uint ticks;
-////////////////////////////////////////////
 
 struct cpu cpus[NCPU];
 
@@ -555,145 +544,128 @@ scheduler(void)
 
 
 // void scheduler week3 version
-void
-scheduler(void)
+void scheduler(void)
 {
+  struct proc *p;
   struct cpu *c = mycpu();
+
   c->proc = 0;
 
-  for(;;){
-    // tránh deadlock: cho phép interrupt
+  for(;;) {
+    // Avoid deadlock by ensuring that devices can interrupt.
     intr_on();
 
-#if SCHED_POLICY == SCHED_RR
-    scheduler_rr_once(c);
-#elif SCHED_POLICY == SCHED_FCFS
-    scheduler_fcfs_once(c);
-#elif SCHED_POLICY == SCHED_PBS
-    scheduler_pbs_once(c);
-#else
-# error "Unknown SCHED_POLICY"
-#endif
-  }
-}
-
-
-// One round of Round-Robin scheduling.
-// This is basically the old scheduler() body without the outer for(;;).
-#if SCHED_POLICY == SCHED_RR
-static void
-scheduler_rr_once(struct cpu *c)
-{
-  struct proc *p;
-
-  for(p = proc; p < &proc[NPROC]; p++){
-    acquire(&p->lock);
-    if(p->state == RUNNABLE){
-      // nếu m có dùng nrun, rtime, wtime etc. thì tăng ở đây:
-      p->nrun++;              // nếu m đã thêm field nrun trong struct proc
-      p->wtime = 0;      // reset wait counter mỗi lần được chạy
-      p->starving = 0;  // hết đói, cứ đc chạy phát là reset starving
-
-      p->state = RUNNING;
-      c->proc = p;
-
-      swtch(&c->context, &p->context);
-
-      // process đã chạy xong một quãng thời gian (do yield/ sleep/ exit)
-      c->proc = 0;
+    #ifdef RR
+    // Round Robin Scheduler
+    for (p = proc; p < &proc[NPROC]; p++) {
+      acquire(&p->lock);
+      if (p->state == RUNNABLE) {
+        // Switch to chosen process. It is the process's job
+        // to release its lock and then reacquire it
+        // before jumping back to us.
+        p->state = RUNNING;
+        c->proc = p;
+        p->numScheduled++;
+        swtch(&c->context, &p->context);
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        c->proc = 0;
+      }
+      release(&p->lock);
     }
-    release(&p->lock);
-  }
-}
-#endif
 
+    #else  // If not RR, we will check FCFS and PBS
 
-// Temporary FCFS: pick the first RUNNABLE process in the table.
-// Later, we'll change this to pick process with smallest ctime.
-#if SCHED_POLICY == SCHED_FCFS
-static void
-scheduler_fcfs_once(struct cpu *c)
-{
-  struct proc *p;
-  struct proc *best = 0;
+    #ifdef FCFS
+    // First-Come, First-Served Scheduler
+    struct proc* firstProcess = 0;
 
-  // Bước 1: tìm process RUNNABLE có ctime nhỏ nhất
-  for(p = proc; p < &proc[NPROC]; p++){
-    acquire(&p->lock);
-    if(p->state == RUNNABLE){
-      if(best == 0){
-        // lần đầu gặp RUNNABLE
-        best = p;
-        // giữ lock của best, KHÔNG release ở đây
-      } else {
-        // so sánh ctime giữa p và best
-        if(p->ctime < best->ctime){
-          // p đến sớm hơn → chọn p làm best mới
-          release(&best->lock);   // bỏ lock của best cũ
-          best = p;               // giữ lock của p (best mới)
-        } else {
-          // best vẫn tốt hơn → bỏ p
-          release(&p->lock);
+    for (p = proc; p < &proc[NPROC]; p++) {
+      acquire(&p->lock);
+      if (p->state == RUNNABLE) {
+        if (!firstProcess || p->ctime < firstProcess->ctime) {
+          if (firstProcess)
+            release(&firstProcess->lock);
+          firstProcess = p;
+          continue;
         }
       }
-    } else {
-      // không runnable → bỏ
       release(&p->lock);
     }
-  }
 
-  // Bước 2: nếu không có process RUNNABLE thì thôi
-  if(best == 0){
-    return;
-  }
-
-  // Bước 3: chạy process được chọn (best)
-  best->nrun++;        // đếm số lần được chọn
-  best->wtime = 0;     // reset thời gian chờ
-  best->starving = 0;  // hết đói
-
-  best->state = RUNNING;
-  c->proc = best;
-
-  swtch(&c->context, &best->context);
-
-  // quay lại scheduler
-  c->proc = 0;
-
-  // thả lock cuối cùng
-  release(&best->lock);
-}
-#endif
-
-
-
-// Temporary PBS: currently same as FCFS/RR placeholder.
-// Later, we'll implement proper priority-based selection.
-#if SCHED_POLICY == SCHED_PBS
-static void
-scheduler_pbs_once(struct cpu *c)
-{
-  struct proc *p;
-
-  for(p = proc; p < &proc[NPROC]; p++){
-    acquire(&p->lock);
-    if(p->state == RUNNABLE){
-      p->nrun++;              // nếu có nrun
-      // về sau ta sẽ dùng p->dyn_prio, starving flag, tie-break, v.v.
-
-      p->state = RUNNING;
-      c->proc = p;
-
-      swtch(&c->context, &p->context);
-
+    if (firstProcess) {
+      firstProcess->state = RUNNING;
+      c->proc = firstProcess;
+      firstProcess->nrun++;
+      swtch(&c->context, &firstProcess->context);
       c->proc = 0;
-      release(&p->lock);
-      return;
+      release(&firstProcess->lock);
     }
-    release(&p->lock);
+
+    #else  // If not FCFS, we check PBS (Priority-based Scheduling)
+
+    #ifdef PBS
+    // Priority-Based Scheduling (PBS)
+    struct proc* process = 0;
+    int dp = 101;  // Default value for comparison
+
+    for (p = proc; p < &proc[NPROC]; p++) {
+      acquire(&p->lock);
+      int niceness = 5;  // Default value for niceness
+
+      // Calculate niceness based on runTime and sleepTime
+      if (p->numScheduled) {
+        if (p->sleepTime + p->runTime != 0)
+          niceness = (int)((p->stime / (p->rtime + p->stime)) * 10);
+        else
+          niceness = 5;  // Default value if no time spent running or sleeping
+      }
+
+      // Calculate dynamic priority (dp) based on niceness
+      int val = p->staticPriority - niceness + 5;
+      int tmp = val < 100 ? val : 100;
+      int processDp = 0 > tmp ? 0 : tmp;
+
+      // Tie-breaking rules (handle numScheduled and timeOfCreation)
+      int flag1 = (dp == processDp && p->numScheduled < process->numScheduled);
+      int flag2 = (dp == processDp && p->numScheduled == process->numScheduled && p->timeOfCreation < process->timeOfCreation);
+
+      // Select process with the lowest dp or tie-breaking rules
+      if (p->state == RUNNABLE) {
+        if (!process || dp > processDp || flag1 || flag2) {
+          if (process)
+            release(&process->lock);
+
+          process = p;
+          dp = processDp;
+          continue;
+        }
+      }
+      release(&p->lock);
+    }
+
+    if (process) {
+      process->numScheduled++;  // Increment number of times process has been scheduled
+      process->startTime = ticks;  // Set start time for the process
+      process->state = RUNNING;
+      process->runTime = 0;  // Reset run time at the start of the process
+      process->sleepTime = 0;  // Reset sleep time
+
+      c->proc = process;  // Set the current process
+      swtch(&c->context, &process->context);  // Context switch to the selected process
+      c->proc = 0;  // Reset current process
+
+      release(&process->lock);  // Release the process lock
+    }
+
+    #endif  // End of PBS
+    #endif  // End of FCFS
+    #endif  // End of RR
+
   }
 }
-#endif
+
+
 
 
 

@@ -97,6 +97,9 @@ struct proc {
   int stime;   // time spent in SLEEPING state (ticks) //// ref
   uint64 ctime;     // creation time in ticks (for FCFS & tie-breaking)
   uint64 etime;     // nếu m cần time kết thúc, có thể thêm
+  int pbs_rtime;
+  int pbs_stime;
+
 //////////////////////////////////////////////////////////////////////////////////
 
   // p->lock must be held when using these:
