@@ -105,6 +105,7 @@ extern uint64 sys_hello(void);
 extern uint64 sys_kalloc1(void);
 extern uint64 sys_psx(void);
 extern uint64 sys_ps(void);
+extern uint64 sys_set_priority(void);
 
 
 // An array mapping syscall numbers from syscall.h
@@ -135,6 +136,7 @@ static uint64 (*syscalls[])(void) = {
 [SYS_kalloc1] sys_kalloc1,
 [SYS_psx]     sys_psx,
 [SYS_ps]      sys_ps,
+[SYS_set_priority] sys_set_priority,
 
 
 };

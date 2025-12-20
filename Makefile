@@ -151,6 +151,7 @@ UPROGS=\
 	$U/_hello\
 	$U/_kdemo\
 	$U/_ps\
+	$U/_setpriority\
 	$U/_cpuburn\
         $U/_iobound\
         $U/_fcfstes\

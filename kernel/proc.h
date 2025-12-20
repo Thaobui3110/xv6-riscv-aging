@@ -28,6 +28,9 @@ struct cpu {
 
 extern struct cpu cpus[NCPU];
 
+// Kernel helper to set a process's static priority. Implemented in proc.c
+int set_priority(int priority, int pid);
+
 // per-process data for the trap handling code in trampoline.S.
 // sits in a page by itself just under the trampoline page in the
 // user page table. not specially mapped in the kernel page table.
@@ -89,6 +92,13 @@ struct proc {
   int rtime;        // total running time (in ticks)
   int wtime;        // total time spent RUNNABLE (waiting for CPU)
   int nrun;         // how many times this process has been scheduled
+
+  // Additional scheduling/statistics fields
+  int staticPriority; // static/base priority (lower = higher priority)
+  int runTime;        // total running time (in ticks)
+  uint64 startTime;   // process start/creation time (ticks)
+  int numScheduled;   // number of times this process has been scheduled
+  int sleepTime;      // total time spent SLEEPING (in ticks)
 
   int priority;     // base / static priority (lower = higher priority)
   int dyn_prio;     // dynamic priority used by PBS (after aging)

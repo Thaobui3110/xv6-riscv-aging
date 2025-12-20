@@ -138,6 +138,13 @@ found:
   p->stime = 0;
   p->pbs_rtime = 0;  // Reset PBS run time
   p->pbs_stime = 0;  // Reset PBS sleep time
+
+  // Initialize newly added scheduling/statistics fields
+  p->numScheduled = 0;
+  p->staticPriority = 60;
+  p->runTime = 0;
+  p->startTime = 0;
+  p->sleepTime = 0;
   
   p->priority = DEFAULT_PRIORITY;   // hoặc một giá trị m chọn, =60
   //p->dyn_prio = p->priority;        // dynamic priority bắt đầu bằng static priority//
@@ -607,32 +614,39 @@ void scheduler(void)
     #else  // If not FCFS, we check PBS (Priority-based Scheduling)
 
     #ifdef PBS
-    // Priority-Based Scheduling (PBS)
+    // Priority-Based Scheduling (PBS) using new proc fields
     struct proc* process = 0;
-    int dp = 101;  // Default value for comparison
+    int dp = 101;  // Default value for comparison (higher than max priority)
 
     for (p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
-      int niceness = 5;  // Default value for niceness
 
-      // Calculate niceness based on runTime and sleepTime
-      if (p->nrun) {
-        if (p->pbs_stime + p->pbs_rtime != 0)
-          niceness = (int)((p->pbs_stime / (p->pbs_rtime + p->pbs_stime)) * 10);
-        else
-          niceness = 5;  // Default value if no time spent running or sleeping
+      int niceness = 5;  // default niceness
+
+      // Compute niceness only if process has been scheduled before
+      if (p->numScheduled) {
+        int denom = p->sleepTime + p->runTime;
+        if (denom != 0) {
+          // multiply first to keep integer precision: (sleep / (run+sleep)) * 10
+          niceness = (p->sleepTime * 10) / denom;
+        } else {
+          niceness = 5;
+        }
       }
 
-      // Calculate dynamic priority (dp) based on niceness =>processDp = val/0/100 => so sánh với dp để chọn
-      int val = p->priority - niceness + 5;
-      int tmp = val < 100 ? val : 100;
-      int processDp = 0 > tmp ? 0 : tmp;
+      // Dynamic priority calculation and clamping to [0,100]
+      int val = p->staticPriority - niceness + 5;
+      int processDp = val;
+      if (processDp > 100) processDp = 100;
+      if (processDp < 0) processDp = 0;
 
-      // Tie-breaking rules (handle numScheduled and timeOfCreation)
-      int flag1 = (dp == processDp && p->nrun < process->nrun);
-      int flag2 = (dp == processDp && p->nrun == process->nrun && p->ctime < process->ctime);
+      // Tie-breakers: fewer schedules preferred, then earlier creation time (ctime)
+      int flag1 = 0, flag2 = 0;
+      if (process) {
+        flag1 = (dp == processDp && p->numScheduled < process->numScheduled);
+        flag2 = (dp == processDp && p->numScheduled == process->numScheduled && p->ctime < process->ctime);
+      }
 
-      // Select process with the lowest dp or tie-breaking rules
       if (p->state == RUNNABLE) {
         if (!process || dp > processDp || flag1 || flag2) {
           if (process)
@@ -647,17 +661,16 @@ void scheduler(void)
     }
 
     if (process) {
-      process->nrun++;  // Increment number of times process has been scheduled
-      process->ctime = ticks;  // Set start time for the process
+      process->numScheduled++;
+      process->startTime = ticks;
       process->state = RUNNING;
-      process->pbs_rtime = 0;  // Reset run time at the start of the process
-      process->pbs_stime = 0;  // Reset sleep time
+      process->runTime = 0;
+      process->sleepTime = 0;
 
-      c->proc = process;  // Set the current process
-      swtch(&c->context, &process->context);  // Context switch to the selected process
-      c->proc = 0;  // Reset current process
-
-      release(&process->lock);  // Release the process lock
+      c->proc = process;
+      swtch(&c->context, &process->context);
+      c->proc = 0;
+      release(&process->lock);
     }
 
     #endif  // End of PBS
@@ -836,6 +849,36 @@ killed(struct proc *p)
   k = p->killed;
   release(&p->lock);
   return k;
+}
+
+// Set static priority of a process identified by pid.
+// Returns the previous static priority on success, -1 if pid not found.
+int
+set_priority(int priority, int pid)
+{
+    struct proc *p;
+
+    for(p = proc; p < &proc[NPROC]; p++)
+    {
+      acquire(&p->lock);
+      
+      if(p->pid == pid)
+      {
+        int val = p->staticPriority;
+        p->staticPriority = priority;
+
+        p->runTime = 0;
+        p->sleepTime = 0;
+
+        release(&p->lock);
+
+        if (val > priority)
+            yield();
+        return val;
+      }
+      release(&p->lock);
+    }
+    return -1;
 }
 
 // Copy to either a user address, or kernel address,
