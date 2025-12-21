@@ -154,6 +154,7 @@ UPROGS=\
 	$U/_cpuburn\
         $U/_iobound\
         $U/_fcfstes\
+	$U/_pbstest\
 
 
 

@@ -122,3 +122,6 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
 };
+
+// Called from the timer interrupt handler to detect starving processes.
+void detect_starving(struct proc *p);

@@ -24,3 +24,5 @@
 #define SYS_kalloc1 23
 #define SYS_psx     24
 #define SYS_ps     25
+#define SYS_setpriority 26
+#define SYS_getpriority 27

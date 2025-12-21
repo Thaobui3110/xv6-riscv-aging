@@ -1,0 +1,1317 @@
+qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp 3 -nographic -global virtio-mmio.force-legacy=false -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
+
+xv6 kernel is booting
+
+hart 1 starting
+hart 2 starting
+pbstest
+init: starting sh
+$ cchild hild 12 t ick 0
+tick 0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 -b-us-y  tPickS 
+at t=0 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	60	3	4	15	0
+4	run	pbstest	10	10	0	18	0
+5	sleep	pbstest	60	2	8	10	0
+6	sleep	pbstest	90	2	8	13	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=5 priority changed 60 -> 59
+[AGING] pid=6 priority changed 90 -> 89
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=1 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	60	9	8	25	0
+4	run	pbstest	10	20	0	38	0
+5	sleep	pbstest	59	2	7	20	0
+6	sleep	pbstest	89	2	7	23	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=3 priority changed 60 -> 59
+[AGING] pid=5 priority changed 59 -> 58
+[AGING] pid=6 priority changed 89 -> 88
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child-- - P0 busy tSi atck
+ t=2 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	59	12	2	37	0
+4	run	pbstest	10	30	0	47	0
+5	sleep	pbstest	58	3	5	30	0
+6	sleep	pbstest	88	2	6	33	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 bus[AGING] pid=6 priority changed 88 -> 87
+y tick
+child 0 busy tick
+[AGING] pid=5 priority changed 58 -> 57
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+ch-ild- - 0P S batu sy tick
+t=3 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	59	17	5	48	0
+4	run	pbstest	10	40	0	68	0
+5	sleep	pbstest	57	6	1	40	0
+6	sleep	pbstest	87	4	3	43	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+c[AGING] pid=3 priority changed 59 -> 58
+hild 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 87 -> 86
+child 0 busy tick
+child 0 busy tick
+child 0 busy t-i-ck-
+ PS at t=4 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	58	20	0	60	0
+4	run	pbstest	10	50	0	80	0
+5	sleep	pbstest	57	12	5	50	0
+6	sleep	pbstest	86	4	2	53	0
+child 0 busy tick
+cchhiilld d2 1 tick 5 0
+tick 50
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=5 priority changed 57 -> 56
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 86 -> 85
+child 0 busy tick
+c--h-i lPSd  at0 bu sy tictk
+=5 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	58	22	7	74	0
+4	run	pbstest	10	60	0	91	0
+5	sleep	pbstest	56	14	2	65	0
+6	sleep	pbstest	85	4	1	66	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=3 priority changed 58 -> 57
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=6 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	57	24	2	85	0
+4	run	pbstest	10	70	0	105	0
+5	sleep	pbstest	56	20	5	75	0
+6	sleep	pbstest	85	5	9	76	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 85 -> 84
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=5 priority changed 56 -> 55
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=7 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	57	28	6	96	0
+4	run	pbstest	10	80	0	121	0
+5	sleep	pbstest	55	20	4	85	0
+6	sleep	pbstest	84	5	8	86	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy[AGING] pid=6 priority changed 84 -> 83
+ tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 bu[AGING] pid=3 priority changed 57 -> 56
+[AGING] pid=5 priority changed 55 -> 54
+sy- -tic-k
+ PS at t=8 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	56	33	0	108	0
+4	run	pbstest	10	90	0	135	0
+5	sleep	pbstest	54	23	0	95	0
+6	sleep	pbstest	83	5	7	96	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy [AGING] pid=6 priority changed 83 -> 82
+tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=9 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	56	33	10	120	0
+4	run	pbstest	10	100	0	142	0
+5	sleep	pbstest	54	28	5	105	0
+6	sleep	pbstest	82	5	6	106	0
+child 0 bus[AGING] pid=3 priority changed 56 -> 55
+y tchiildc 1 tick
+chk 1i0ld 0
+2 tick 100
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy[AGING] pid=6 priority changed 82 -> 81
+ tick
+child 0 busy tick
+child 0 busy tick
+child 0 b[AGING] pid=5 priority changed 54 -> 53
+usy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=10 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	55	38	4	131	0
+4	run	pbstest	10	109	0	152	0
+5	sleep	pbstest	53	31	1	119	0
+6	sleep	pbstest	81	5	5	118	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 81 -> 80
+child 0 busy tick
+[AGING] pid=3 priority changed 55 -> 54
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=11 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	54	41	0	142	0
+4	run	pbstest	10	119	0	163	0
+5	sleep	pbstest	53	35	6	129	0
+6	sleep	pbstest	80	5	4	128	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 80 -> 79
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 bus-y t-- Pick
+S at t=12 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	54	45	1	153	0
+4	run	pbstest	10	129	0	171	0
+5	sleep	pbstest	53	43	8	136	0
+6	sleep	pbstest	79	7	1	138	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=5 priority changed 53 -> 52
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 79 -> 78
+--- PS at t=13 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	54	49	7	164	0
+4	run	pbstest	10	139	0	178	0
+5	sleep	pbstest	52	49	1	146	0
+6	sleep	pbstest	78	7	0	148	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+chi[AGING] pid=3 priority changed 54 -> 53
+ld 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=14 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	53	53	1	174	0
+4	run	pbstest	10	149	0	187	0
+5	sleep	pbstest	52	54	6	156	0
+6	sleep	pbstest	78	7	10	158	0
+child 0 busy tick
+c[AGING] pid=6 priority changed 78 -> 77
+hichld ild0 b 2 tuick s1y5 t0ick
+
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 1 tickchild 0  15bu0s
+y tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=5 priority changed 52 -> 51
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy ti--c-k 
+PS at t=15 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	53	56	5	185	0
+4	run	pbstest	10	159	0	202	0
+5	sleep	pbstest	51	59	0	167	0
+6	sleep	pbstest	77	8	8	170	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 77 -> 76
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=3 priority changed 53 -> 52
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PSc athild 0 t=16 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3 	run	pbstest	52	58	1	196	0
+4bu	run	pbstest	10	169	0	217	0
+5	sleep	pbstest	51	64	4	177	0
+6	sleep	pbstest	76	8	7	180	0
+sy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 76 -> 75
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=5 priority changed 51 -> 50
+child 0 busy tick
+child 0 busy tick
+--- PS at t=17 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	52	62	3	206	0
+4	run	pbstest	10	179	0	234	0
+5	sleep	pbstest	50	66	1	187	0
+6	sleep	pbstest	75	11	3	190	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 75 -> 74
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=5 priority changed 50 -> 49
+--- PS at t=18 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	52	66	7	216	0
+4	run	pbstest	10	189	0	250	0
+5	sleep	pbstest	49	66	0	197	0
+6	sleep	pbstest	74	12	1	200	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=3 priority changed 52 -> 51
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=19 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	51	68	3	228	0
+4	run	pbstest	10	199	0	267	0
+5	sleep	pbstest	49	71	4	207	0
+6	sleep	pbstest	74	12	10	210	0
+child 0 busy tick
+[AGING] pid=6 priority changed 74 -> 73
+child 2 tick 200
+child 0 busy tick
+child 0 busy tick
+child 1 tick 200
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick[AGING] pid=5 priority changed 49 -> 48
+
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick[AGING] pid=3 priority changed 51 -> 50
+
+--- PS at t=20 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	50	69	0	238	0
+4	run	pbstest	10	209	0	270	0
+5	sleep	pbstest	48	73	1	217	0
+6	sleep	pbstest	73	12	9	221	0
+child 0 busy tick
+child 0 busy tick
+ch[AGING] pid=6 priority changed 73 -> 72
+ild 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick-
+-- PS at t=21 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	50	75	3	250	0
+4	run	pbstest	10	219	0	289	0
+5	sleep	pbstest	48	75	9	227	0
+6	sleep	pbstest	72	12	8	231	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 bu[AGING] pid=6 priority changed 72 -> 71
+sy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=3 priority changed 50 -> 49
+[AGING] pid=5 priority changed 48 -> 47
+child 0 busy tick
+--- PS at t=22 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	49	76	1	260	0
+4	run	pbstest	10	229	0	300	0
+5	sleep	pbstest	47	83	0	237	0
+6	sleep	pbstest	71	12	7	241	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 71 -> 70
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=23 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	49	79	8	271	0
+4	run	pbstest	10	239	0	318	0
+5	sleep	pbstest	47	90	3	247	0
+6	sleep	pbstest	70	12	6	251	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=3 priority changed 49 -> 48
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 70 -> 69
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 bus-y ti-- PSck 
+at t=24 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	48	83	2	286	0
+4	run	pbstest	10	249	0	338	0
+5	sleep	pbstest	47	96	7	257	0
+6	sleep	pbstest	69	14	3	261	0
+child 0 busy tick
+child 2 tcick 250
+hild 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 1 tick 250
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=5 priority changed 47 -> 46
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 69 -> 68
+child 0 busy tick
+child 0 busy tick
+--- PS at t=25 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	48	89	4	296	0
+4	run	pbstest	10	259	0	348	0
+5	sleep	pbstest	46	102	0	267	0
+6	sleep	pbstest	68	15	1	271	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick[AGING] pid=3 priority changed 48 -> 47
+
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 68 -> 67
+--- PS at t=26 -child 0- bu-
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	slesep	sh	60	1	0	10	0
+3	run	pbstest	47	92	0	308	0
+4	run	pbstest	10	269	0	369	0
+5	sleep	pbstest	46	108	3	277	0
+6	sleep	pbstest	67	15	0	281	0
+y tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+chi[AGING] pid=5 priority changed 46 -> 45
+ld 0 busy tick
+child 0 busy tick
+--- PS at t=27 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	47	98	2	318	0
+4	run	pbstest	10	278	1	382	0
+5	sleep	pbstest	45	109	1	287	0
+6	sleep	pbstest	67	15	10	291	0
+child 0 busy tick
+[AGING] pid=6 priority changed 67 -> 66
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=28 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	47	100	9	328	0
+4	run	pbstest	10	287	2	393	0
+5	sleep	pbstest	45	118	2	297	0
+6	sleep	pbstest	66	15	9	301	0
+child 0 busy tick
+[AGING] pid=3 priority changed 47 -> 46
+[AGING] pid=6 priority changed 66 -> 65
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=5 priority changed 45 -> 44
+child 0 busy tick
+child 0 busy -ti-c- k
+PS at t=29 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	46	107	1	339	0
+4	run	pbstest	10	297	2	397	0
+5	sleep	pbstest	44	119	0	307	0
+6	sleep	pbstest	65	15	8	311	0
+child 0 busy tick
+child 2 tick 300
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 65 -> 64
+child 0 busy tick
+child 1 tick 30chi0ld 0
+ busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=30 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	46	110	8	350	0
+4	run	pbstest	10	307	2	411	0
+5	sleep	pbstest	44	125	4	319	0
+6	sleep	pbstest	64	15	7	321	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick[AGING] pid=3 priority changed 46 -> 45
+
+child 0 busy tick
+[AGING] pid=6 priority changed 64 -> 63
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 [AGING] pid=5 priority changed 44 -> 43
+busy tick
+child 0 busy tick
+--- PS at t=31 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	45	113	3	362	0
+4	run	pbstest	10	317	2	423	0
+5	sleep	pbstest	43	128	0	329	0
+6	sleep	pbstest	63	15	6	331	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 63 -> 62
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=3 priority changed 45 -> 44
+child 0 busy tick
+--- PS at t=32 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	44	115	0	372	0
+4	run	pbstest	10	327	2	435	0
+5	sleep	pbstest	43	136	2	339	0
+6	sleep	pbstest	62	15	5	341	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 62 -> 61
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=33 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	44	124	1	382	0
+4	run	pbstest	10	337	2	448	0
+5	sleep	pbstest	43	138	10	349	0
+6	sleep	pbstest	61	15	4	351	0
+child 0 busy tick
+[AGING] pid=5 priority changed 43 -> 42
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 61 -> 60
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=34 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	44	125	10	394	0
+4	run	pbstest	10	347	2	454	0
+5	sleep	pbstest	42	144	3	359	0
+6	sleep	pbstest	60	15	3	361	0
+[AGING] pid=3 priority changed 44 -> 43
+cchhilid 0ld 2 tic busy tickk 
+350
+child 0 busy tick
+child 0 busy tick
+child 1 tick 350
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 60 -> 59
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=5 priority changed 42 -> 41
+child 0 busy tick
+child 0 bu--- sy PS ticak
+t t=35 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	43	131	3	406	0
+4	run	pbstest	10	357	2	466	0
+5	sleep	pbstest	41	146	0	369	0
+6	sleep	pbstest	59	15	2	371	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 59 -> 58
+child 0 busy tick
+child 0 busy t--ick-
+ PS at t=36 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	43	134	10	418	0
+4	run	pbstest	10	367	2	479	0
+5	sleep	pbstest	41	154	2	379	0
+6	sleep	pbstest	58	15	1	381	0
+child 0 busy tick
+[AGING] pid=3 priority changed 43 -> 42
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+---ch PiS altd t 0 bu=3s7y - -tick
+-
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	42	139	1	433	0
+4	run	pbstest	10	377	2	493	0
+5	sleep	pbstest	41	159	6	389	0
+6	sleep	pbstest	58	17	9	391	0
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 58 -> 57
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy t[AGING] pid=5 priority changed 41 -> 40
+ick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=38 --c-h
+i
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	42	143	6	443	0
+4	run	pbstest	10	387	2	508	ld 0 b0
+5	sleep	pbstest	40	164	0	399	0
+6	sleep	pbstest	57	18	7	401	0
+usy tick
+child 0 busy tick
+child 0 busy tick
+child 0[AGING] pid=6 priority changed 57 -> 56
+ busy tick
+[AGING] pid=3 priority changed 42 -> 41
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=39 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	41	144	4	453	0
+4	run	pbstest	10	396	2	516	0
+5	sleep	pbstest	40	166	7	409	0
+6	sleep	pbstest	56	18	5	411	0
+child 0 busy tick
+child 2 tick 400
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=5 priority changed 40 -> 39
+child 1 tick 400
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 56 -> 55
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=3 priority changed 41 -> 40
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=40 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	40	146	0	463	0
+4	run	pbstest	10	406	2	520	0
+5	sleep	pbstest	39	169	3	419	0
+6	sleep	pbstest	55	18	4	421	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 55 -> 54
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=5 priority changed 39 -> 38
+child 0 busy tick
+--- PS at t=41 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	40	150	4	474	0
+4	run	pbstest	10	416	2	537	0
+5	sleep	pbstest	38	171	0	429	0
+6	sleep	pbstest	54	19	2	431	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=3 priority changed 40 -> 39
+child 0 busy tick
+chil[AGING] pid=6 priority changed 54 -> 53
+d -0- b- PuSs yat t =42ti c---
+k
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	39	150	1	489	0
+4	run	pbstest	10	426	2	554	0
+5	sleep	pbstest	38	178	3	439	0
+6	sleep	pbstest	53	20	0	441	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 [AGING] pid=5 priority changed 38 -> 37
+busy tick
+--- PS at t=43child 0 busy tick
+ ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	39	154	7	502	0
+4	run	pbstest	10	437	2	574	0
+5	sleep	pbstest	37	180	1	450	0
+6	sleep	pbstest	53	21	10	452	0
+child 0 bu[AGING] pid=6 priority changed 53 -> 52
+sy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 [AGING] pid=3 priority changed 39 -> 38
+busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PSc aht t=i44 ---
+
+PIlD	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	38	d 160	0	515	0
+4	run	pbstest	10	447	2	583	0
+5	sleep	pbstest	37	183	8	460	0
+6	run	pb2 stest	52	21	9	462	0
+tick 450
+child 0 busy tick
+chil[AGING] pid=6 priority changed 52 -> 51
+d 0 busy tick
+child 0 busy tick
+[AGING] pid=5 priority changed 37 -> 36
+child 1 tick 450
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=45 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	38	161	7	525	0
+4	run	pbstest	10	457	2	594	0
+5	sleep	pbstest	36	189	1	471	0
+6	sleep	pbstest	51	21	8	472	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 51 -> 50
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=3 priority changed 38 -> 37
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+chi--ld -0 b usyPS tic kat
+ t=46 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	37	165	1	538	0
+4	run	pbstest	10	467	2	610	0
+5	sleep	pbstest	36	192	8	481	0
+6	sleep	pbstest	50	21	7	482	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 b[AGING] pid=5 priority changed 36 -> 35
+[AGING] pid=6 priority changed 50 -> 49
+usy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=47 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	37	169	6	548	0
+4	run	pbstest	10	477	2	626	0
+5	sleep	pbstest	35	199	0	491	0
+6	sleep	pbstest	49	21	6	492	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 49 -> 48
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+chi[AGING] pid=3 priority changed 37 -> 36
+ld 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PS at t=48 ---
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	36	174	0	558	0
+4	run	pbstest	10	487	2	632	0
+5	sleep	pbstest	35	208	1	501	0
+6	sleep	pbstest	48	21	5	502	0
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+[AGING] pid=6 priority changed 48 -> 47
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+child 0 busy tick
+--- PSc at t=hi49l -d- 2- tic
+
+PID	STATE	NAME	PRIO	RTIME	WTIME	NRUN	STARVING
+1	sleep	init	60	6	2	34	0
+2	sleep	sh	60	1	0	10	0
+3	run	pbstest	36	182	0	575	0
+4	run	pbstest	10	497	2	642	0
+5	sleep	pbstest	35	212	7	511	0
+6	run	pbstest	47	21	4	514	k 500
+0
+$ 

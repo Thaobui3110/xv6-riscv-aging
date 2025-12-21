@@ -46,6 +46,8 @@ entry("hello");
 entry("kalloc1");
 entry("psx");
 entry("ps");
+entry("setpriority");
+entry("getpriority");
 
  
 

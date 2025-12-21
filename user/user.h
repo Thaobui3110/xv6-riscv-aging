@@ -28,6 +28,8 @@ int hello(void);
 int kalloc1(void);
 int psx(void);
 int ps(void);
+int setpriority(int, int);
+int getpriority(int);
 
 
 

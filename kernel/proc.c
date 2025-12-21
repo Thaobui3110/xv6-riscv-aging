@@ -197,11 +197,6 @@ aging_update(struct proc *p)
     p->wtime = 0;
   }
 
-  // Nếu chờ quá STARVING_THRESHOLD → đánh dấu starving
-  if(p->wtime > STARVING_THRESHOLD){
-    p->starving = 1;
-  }
-
 #ifdef DEBUG_AGING
   if(p->priority != old_prio){
     printf("[AGING] pid=%d priority changed %d -> %d\n",
@@ -212,6 +207,17 @@ aging_update(struct proc *p)
            p->pid, p->wtime);
   }
 #endif
+}
+
+// Detect starving independently of AGING_ENABLE. This only marks the proc as starving
+// when its wtime exceeds STARVING_THRESHOLD. We call this every tick for RUNNABLE procs.
+void
+detect_starving(struct proc *p)
+{
+  // Mark starving based on accumulated wtime regardless of current state.
+  if(p->wtime > STARVING_THRESHOLD){
+    p->starving = 1;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -613,45 +619,48 @@ void scheduler(void)
 
     for (p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
-      int niceness = 5;  // Default value for niceness
-
-      // Calculate niceness based on runTime and sleepTime
-      if (p->nrun) {
-        if (p->pbs_stime + p->pbs_rtime != 0)
-          niceness = (int)((p->pbs_stime / (p->pbs_rtime + p->pbs_stime)) * 10);
-        else
-          niceness = 5;  // Default value if no time spent running or sleeping
+      if (p->state != RUNNABLE) {
+        release(&p->lock);
+        continue;
       }
 
-      // Calculate dynamic priority (dp) based on niceness =>processDp = val/0/100 => so sánh với dp để chọn
+      // Calculate niceness based on runTime and sleepTime (0..10)
+      int niceness = 5;  // default
+      uint64 run = p->pbs_rtime;
+      uint64 sleep = p->pbs_stime;
+      if (run + sleep != 0) {
+        niceness = (int)((sleep * 10) / (run + sleep));
+      }
+
+      // Calculate dynamic priority (clamp to [0..100])
       int val = p->priority - niceness + 5;
-      int tmp = val < 100 ? val : 100;
-      int processDp = 0 > tmp ? 0 : tmp;
+      if (val > 100) val = 100;
+      if (val < 0) val = 0;
+      int processDp = val;
 
-      // Tie-breaking rules (handle numScheduled and timeOfCreation)
-      int flag1 = (dp == processDp && p->nrun < process->nrun);
-      int flag2 = (dp == processDp && p->nrun == process->nrun && p->ctime < process->ctime);
+      // Select process with the lowest dp. Tie-break: older creation time first,
+      // then fewer runs. This prioritizes earlier-created processes when dp ties.
+      if (!process
+          || dp > processDp
+          || (dp == processDp && p->ctime < process->ctime)
+          || (dp == processDp && p->ctime == process->ctime && p->nrun < process->nrun)) {
+        if (process)
+          release(&process->lock);
 
-      // Select process with the lowest dp or tie-breaking rules
-      if (p->state == RUNNABLE) {
-        if (!process || dp > processDp || flag1 || flag2) {
-          if (process)
-            release(&process->lock);
-
-          process = p;
-          dp = processDp;
-          continue;
-        }
+        process = p;
+        dp = processDp;
+        continue;
       }
+
       release(&p->lock);
     }
 
     if (process) {
-      process->nrun++;  // Increment number of times process has been scheduled
-      process->ctime = ticks;  // Set start time for the process
-      process->state = RUNNING;
-      process->pbs_rtime = 0;  // Reset run time at the start of the process
-      process->pbs_stime = 0;  // Reset sleep time
+  process->nrun++;  // Increment number of times process has been scheduled
+  process->starving = 0; // reset starving flag when process is selected to run
+  // Do NOT overwrite creation time (ctime) -- it should remain the creation timestamp
+  process->state = RUNNING;
+  // Keep pbs_rtime/pbs_stime to reflect long-term run/sleep history (do not reset)
 
       c->proc = process;  // Set the current process
       swtch(&c->context, &process->context);  // Context switch to the selected process

@@ -7,6 +7,50 @@
 #include "proc.h"
 #include "vm.h"
 
+extern struct proc proc[]; // refer to process table
+
+// setpriority(pid, prio) : set static priority for pid
+uint64
+sys_setpriority(void)
+{
+  int pid, pr;
+  argint(0, &pid);
+  argint(1, &pr);
+  if(pr < MIN_PRIORITY || pr > MAX_PRIORITY)
+    return -1;
+
+  struct proc *p;
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+    if(p->pid == pid){
+      p->priority = pr;
+      release(&p->lock);
+      return 0;
+    }
+    release(&p->lock);
+  }
+  return -1;
+}
+
+// getpriority(pid) : return static priority or -1 on error
+uint64
+sys_getpriority(void)
+{
+  int pid;
+  argint(0, &pid);
+  struct proc *p;
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+    if(p->pid == pid){
+      int pr = p->priority;
+      release(&p->lock);
+      return pr;
+    }
+    release(&p->lock);
+  }
+  return -1;
+}
+
 uint64
 sys_exit(void)
 {

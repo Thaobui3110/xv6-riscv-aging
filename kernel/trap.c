@@ -75,8 +75,11 @@ usertrap(void)
 
   // timer interrupt preemption control
   if(which_dev == 2){
-#if SCHED_POLICY == SCHED_RR || SCHED_POLICY == SCHED_PBS
-   yield();
+    // Preempt only under the Round-Robin scheduler.
+    // For PBS we want non-preemptive behaviour: running process continues
+    // until it yields, blocks, or exits.
+#ifdef RR
+    yield();
 #endif
 
 
@@ -148,8 +151,12 @@ kerneltrap()
   }
 
   // give up the CPU if this is a timer interrupt.
-  if(which_dev == 2 && myproc() != 0)
+  // Preempt only under Round-Robin. PBS/FCFS are non-preemptive here.
+  if(which_dev == 2 && myproc() != 0) {
+#ifdef RR
     yield();
+#endif
+  }
 
   // the yield() may have caused some traps to occur,
   // so restore trap registers for use by kernelvec.S's sepc instruction.
@@ -178,11 +185,13 @@ clockintr()
         //cprintf("Process %d (RUNNING): rtime=%d, pbs_rtime=%d\n", p->pid, p->rtime, p->pbs_rtime);
       	}
       else if(p->state == RUNNABLE){
-        p->wtime++;
-         // Debug: in ra thông tin khi process đang RUNNABLE
-        //cprintf("Process %d (RUNNABLE): wtime=%d\n", p->pid, p->wtime);
-        // 👉 chỉ cần gọi hàm aging_update, không làm logic aging trực tiếp ở đây nữa
-        aging_update(p);
+  p->wtime++;
+   // Debug: in ra thông tin khi process đang RUNNABLE
+  //cprintf("Process %d (RUNNABLE): wtime=%d\n", p->pid, p->wtime);
+#if AGING_ENABLE
+  // Call aging_update only when aging is enabled
+  aging_update(p);
+#endif
       }
       else if(p->state == SLEEPING) {
       	p->stime++;
@@ -190,6 +199,8 @@ clockintr()
       	 // Debug: in ra thông tin khi process đang RUNNABLE
         //cprintf("Process %d (RUNNABLE): wtime=%d\n", p->pid, p->wtime);
       	}
+      // Always detect starvation regardless of AGING_ENABLE and regardless of state
+      detect_starving(p);
       release(&p->lock);
     }
   }
