@@ -8,6 +8,7 @@ struct pstat {
   int inuse[NPROC];
   int priority[NPROC];
   int wtime[NPROC];
+  int rtime[NPROC];
   int starving[NPROC];
   char name[NPROC][16];
   int state[NPROC]; // Adding state to visualize RUNNABLE/RUNNING etc.

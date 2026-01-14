@@ -13,21 +13,61 @@ void busy_loop(int x) {
     }
 }
 
-void test_priority_ordering() {
-    printf("--- Case 1: Priority Ordering Test ---\n");
-    process_aging(0); // Disable aging
-    
-    int priorities[3] = {20, 10, 5}; // Low, Med, High (lower val = high purity)
-    
-    for(int i=0; i<3; i++) {
-        int pid = fork();
-        if(pid == 0) {
-            set_priority(getpid(), priorities[i]);
-            busy_loop(50); // Simulating CPU work
-            exit(0);
+void print_ps_table() {
+    static struct pstat *st = 0;
+    if(st == 0) {
+        st = malloc(sizeof(struct pstat));
+        if(st == 0) {
+            printf("testsched: malloc failed\n");
+            return;
         }
     }
     
+    static char *states[] = {
+        "UNUSED", "USED", "SLEEPING", "RUNNABLE", "RUNNING", "ZOMBIE"
+    };
+
+    if(getpinfo(st) < 0){
+        printf("testsched: getpinfo failed\n");
+        return;
+    }
+
+    printf("\nPID\tName\tPriority\tState\t\tWait Time\tRun Time\tStarving\n");
+    for(int i = 0; i < NPROC; i++){
+        if(st->inuse[i]){
+            printf("%d\t%s\t%d\t\t%s", st->pid[i], st->name[i], st->priority[i], states[st->state[i]]);
+            if(strlen(states[st->state[i]]) < 8) printf("\t");
+            printf("\t%d\t\t%d\t\t%s\n", st->wtime[i], st->rtime[i], st->starving[i] ? "Yes" : "No");
+        }
+    }
+    printf("---------------------------------------------------------------------------\n");
+}
+
+void test_priority_ordering() {
+    printf("--- Case 1: Priority Ordering Test ---\n");
+    process_aging(0); // Disable aging
+    set_priority(getpid(), 0); // Parent Highest Prio to control setup
+    
+    int priorities[3] = {20, 10, 5}; // Low, Med, High (lower val = high purity)
+
+
+    for(int i=0; i<3; i++) {
+        int pid = fork();
+        if(pid == 0) {
+            // Child just runs
+            busy_loop(2000); 
+            exit(0);
+        } else {
+            set_priority(pid, priorities[i]); // Parent sets priority
+        }
+    }
+    
+    // Visualization loop
+    for(int k=0; k<15; k++) {
+         print_ps_table();
+         pause(5); 
+    }
+
     for(int i=0; i<3; i++) {
         int wpid = wait(0);
         printf("Child finished: PID=%d\n", wpid);
@@ -40,41 +80,48 @@ void test_starvation_detection() {
     process_aging(0); // Disable aging
     set_priority(getpid(), 0); // Max priority for monitoring
     
+    // Fork VICTIM (Low Priority)
     int victim = fork();
     if(victim == 0) {
-        set_priority(getpid(), 20); // Lowest priority
-        busy_loop(1000); 
+        while(1) busy_loop(100); 
         exit(0);
     }
+    set_priority(victim, 20); // Parent sets priority
     
     printf("Victim PID=%d created with Priority 20.\n", victim);
     
-    // Create aggressors
+    // Create AGGRESSORS (High Priority)
     int aggressors[3];
     for(int i=0; i<3; i++){
         aggressors[i] = fork();
         if(aggressors[i] == 0){
-            set_priority(getpid(), 5); // High priority
-            busy_loop(1000);
+            while(1) busy_loop(100);
             exit(0);
         }
+        set_priority(aggressors[i], 5); // Parent sets priority
     }
     
     // Monitor
-    struct pstat st;
+    static struct pstat *st = 0;
+    if(st == 0) st = malloc(sizeof(struct pstat));
     int starved = 0;
-    for(int k=0; k<200; k++) {
+    for(int k=0; k<200; k++) { // Loop for visualization
+        // Visualization
+        print_ps_table();
+        
         pause(5);
-        if(getpinfo(&st) == 0){
+
+        if(getpinfo(st) == 0){
             for(int i=0; i<NPROC; i++){
-                if(st.pid[i] == victim && st.starving[i]) {
+                if(st->pid[i] == victim && st->starving[i]) {
+                    print_ps_table(); // Show the state that triggered success
                     printf("SUCCESS: Victim PID=%d is STARVING!\n", victim);
                     starved = 1;
+                    k = 200; // Force loop exit
                     break;
                 }
             }
         }
-        if(starved) break;
     }
     
     if(!starved) printf("FAILURE: Victim did not starve.\n");
@@ -91,33 +138,39 @@ void test_aging_rebalancing() {
     
     int victim = fork();
     if(victim == 0) {
-        set_priority(getpid(), 20); // Lowest priority initial
-        busy_loop(1000); 
+        while(1) busy_loop(100); 
         exit(0);
     }
+    set_priority(victim, 20);
     
     // Create aggressors
     int aggressors[3];
     for(int i=0; i<3; i++){
         aggressors[i] = fork();
         if(aggressors[i] == 0){
-            set_priority(getpid(), 5); // High priority initial
-            busy_loop(1000);
+            while(1) busy_loop(100);
             exit(0);
         }
+        set_priority(aggressors[i], 5);
     }
     
-    struct pstat st;
+    static struct pstat *st = 0;
+    if(st == 0) st = malloc(sizeof(struct pstat));
     int improved = 0;
     int initial_victim_prio = 20;
 
     for(int k=0; k<200; k++) {
+        // Visualization
+        print_ps_table();
         pause(5);
-        if(getpinfo(&st) == 0){
+
+        if(getpinfo(st) == 0){
              for(int i=0; i<NPROC; i++){
-                if(st.pid[i] == victim) {
-                    printf("Victim PID=%d Priority=%d\n", victim, st.priority[i]);
-                    if(st.priority[i] < initial_victim_prio) improved = 1;
+                if(st->pid[i] == victim) {
+                    if(st->priority[i] < initial_victim_prio) {
+                        improved = 1;
+                        printf("VICTIM PRIORITY IMPROVED: %d -> %d\n", initial_victim_prio, st->priority[i]);
+                    }
                 }
             }
         }
@@ -133,7 +186,7 @@ void test_aging_rebalancing() {
 
 int main(int argc, char *argv[]) {
     if(argc < 2) {
-        printf("Usage: testsched <case_num>\n");
+        printf("Usage: test <case_num>\n");
         printf("1: Priority Ordering\n");
         printf("2: Starvation Detection\n");
         printf("3: Aging Rebalancing\n");

@@ -185,9 +185,9 @@ freeproc(struct proc *p)
   p->rtime = 0;
 }
 
-#define AGING_THRESHOLD 100 // Sau 100 ticks chờ đợi thì tăng ưu tiên
-#define RUN_THRESHOLD 100   // Chạy 100 ticks thì giảm ưu tiên
-#define STARVATION_THRESHOLD 500 // Sau 500 ticks chờ đợi thì coi là đói
+#define AGING_THRESHOLD 50 // Sau 50 ticks chờ đợi thì tăng ưu tiên
+#define RUN_THRESHOLD 50   // Chạy 50 ticks thì giảm ưu tiên
+#define STARVATION_THRESHOLD 250 // Sau 250 ticks chờ đợi thì coi là đói
 void
 update_wtime(void)
 {
@@ -781,4 +781,23 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+// Check if there is any RUNNABLE process with higher priority than current process
+// Returns 1 if yield is recommended, 0 otherwise.
+int
+check_preemption(void)
+{
+  struct proc *p;
+  struct proc *curr = myproc();
+  int curr_prio = (curr ? curr->priority : 21); // 21 is lower than min priority (20)
+
+  // Iterate to find any RUNNABLE process with strictly lower priority value (higher importance)
+  // No lock held for speed - opportunistic check.
+  for(p = proc; p < &proc[NPROC]; p++) {
+    if(p->state == RUNNABLE && p->priority < curr_prio) {
+      return 1;
+    }
+  }
+  return 0;
 }

@@ -168,6 +168,7 @@ sys_getpinfo(void)
     pst.inuse[i] = (p->state != UNUSED);
     pst.priority[i] = p->priority;
     pst.wtime[i] = p->wtime;
+    pst.rtime[i] = p->rtime;
     pst.starving[i] = p->starving;
     pst.state[i] = p->state;
     safestrcpy(pst.name[i], p->name, sizeof(p->name));

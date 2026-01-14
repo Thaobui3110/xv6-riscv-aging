@@ -16,7 +16,7 @@ main(int argc, char *argv[])
     exit(1);
   }
 
-  printf("PID\tName\tPriority\tState\t\tWait Time\tStarving\n");
+  printf("PID\tName\tPriority\tState\t\tWait Time\tRun Time\tStarving\n");
   for(int i = 0; i < NPROC; i++){
     if(st.inuse[i]){
       printf("%d\t%s\t%d\t\t%s", st.pid[i], st.name[i], st.priority[i], states[st.state[i]]);
@@ -24,7 +24,7 @@ main(int argc, char *argv[])
       // Align tabs based on state name length if needed, simplistic approach:
       if(strlen(states[st.state[i]]) < 8) printf("\t");
       
-      printf("\t%d\t\t%s\n", st.wtime[i], st.starving[i] ? "Yes" : "No");
+      printf("\t%d\t\t%d\t\t%s\n", st.wtime[i], st.rtime[i], st.starving[i] ? "Yes" : "No");
     }
   }
   exit(0);
