@@ -10,6 +10,7 @@ struct spinlock tickslock;
 uint ticks;
 
 extern char trampoline[], uservec[];
+extern void update_wtime(void);
 
 // in kernelvec.S, calls kerneltrap().
 void kernelvec();
@@ -167,6 +168,7 @@ clockintr()
   if(cpuid() == 0){
     acquire(&tickslock);
     ticks++;
+    update_wtime();
     wakeup(&ticks);
     release(&tickslock);
   }

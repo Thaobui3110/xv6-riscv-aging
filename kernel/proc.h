@@ -92,6 +92,14 @@ struct proc {
   int xstate;                  // Exit status to be returned to parent's wait
   int pid;                     // Process ID
 
+  // --- THÊM VÀO ĐÂY ---
+  int priority;                // Độ ưu tiên (Ví dụ: 0 đến 20, số càng nhỏ ưu tiên càng cao)
+  int wtime;                   // Thời gian chờ (số ticks tiến trình ở trạng thái RUNNABLE)
+  uint ctime;                  // Thời gian tạo (ticks khi process được tạo)
+  uint rtime;                  // Thời gian chạy (ticks process ở trạng thái RUNNING)
+  int starving;
+  // --------------------
+
   // wait_lock must be held when using this:
   struct proc *parent;         // Parent process
 

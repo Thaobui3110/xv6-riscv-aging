@@ -14,9 +14,11 @@ struct proc *initproc;
 
 int nextpid = 1;
 struct spinlock pid_lock;
+int aging_enabled = 1;
 
 extern void forkret(void);
 static void freeproc(struct proc *p);
+extern uint ticks; // ticks declared in trap.c
 
 extern char trampoline[]; // trampoline.S
 
@@ -125,6 +127,14 @@ found:
   p->pid = allocpid();
   p->state = USED;
 
+  // --- KHỞI TẠO GIÁ TRỊ MỚI ---
+  p->priority = 10;  // Gán độ ưu tiên mặc định là 10
+  p->wtime = 0;     // Mới tạo nên thời gian chờ bằng 0
+  p->ctime = ticks; // Ghi nhận thời gian tạo
+  p->rtime = 0;
+  p->starving = 0;
+  // ----------------------------
+
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
     freeproc(p);
@@ -169,6 +179,56 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->state = UNUSED;
+  p->priority = 0;
+  p->wtime = 0;
+  p->starving = 0;
+  p->rtime = 0;
+}
+
+#define AGING_THRESHOLD 100 // Sau 100 ticks chờ đợi thì tăng ưu tiên
+#define RUN_THRESHOLD 100   // Chạy 100 ticks thì giảm ưu tiên
+#define STARVATION_THRESHOLD 500 // Sau 500 ticks chờ đợi thì coi là đói
+void
+update_wtime(void)
+{
+  struct proc *p;
+  for(p = proc; p < &proc[NPROC]; p++) {
+    acquire(&p->lock);
+    if(p->state == RUNNABLE) {
+      p->wtime++;
+      
+      // AGING LOGIC: Increase priority (decrease value) if waiting too long
+      if(aging_enabled && p->wtime > AGING_THRESHOLD) {
+        if(p->priority > 0) {
+           p->priority--; 
+           p->wtime = 0; 
+        }
+      }
+
+      // Kiểm tra Starvation /// vấn đề chỉ check starvation khi process ở trạng thái RUNNABLE
+      // nhớ thêm rtime vào bảng ps
+      // check lại logic preemption của gemini (preempt ngay lập tức chứ không đợi timer interrupt)
+      // check lại tool visualization
+      if(p->wtime > STARVATION_THRESHOLD) {
+        p->starving = 1; 
+      } 
+    } else if(p->state == RUNNING) {
+      p->rtime++;
+      
+      // Demotion Logic: Decrease priority (increase value) if running too long
+      if(aging_enabled && p->rtime > RUN_THRESHOLD) {
+        if(p->priority < 20) { // Assuming 20 is min priority (max value)
+           p->priority++;
+           p->rtime = 0;
+        }
+      }
+
+      // Khi được chạy rồi thì không còn đói nữa và reset wtime
+      p->starving = 0;
+      p->wtime = 0; 
+    }
+    release(&p->lock);
+  }
 }
 
 // Create a user page table for a given process, with no user memory,
@@ -281,6 +341,9 @@ kfork(void)
 
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
+
+  // --- KẾ THỪA PRIORITY ---
+  np->priority = p->priority;
 
   // increment reference counts on open file descriptors.
   for(i = 0; i < NOFILE; i++)
@@ -438,23 +501,54 @@ scheduler(void)
     intr_off();
 
     int found = 0;
+    // Priority Based Scheduler
+    struct proc *high_p = 0;
+
+    // Find the process with highest priority (lowest value)
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
       if(p->state == RUNNABLE) {
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
-        p->state = RUNNING;
-        c->proc = p;
-        swtch(&c->context, &p->context);
-
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
-        found = 1;
+        if(high_p == 0) {
+          high_p = p;
+        } else {
+          // Compare priorities
+          if(p->priority < high_p->priority) {
+            release(&high_p->lock);
+            high_p = p;
+          } else if(p->priority == high_p->priority) {
+            // Tie-breaker: FCFS using ctime (Creation Time)
+            // Smaller ctime means created earlier -> run first
+            if(p->ctime < high_p->ctime) {
+               release(&high_p->lock);
+               high_p = p;
+            } else {
+               release(&p->lock); // Keep high_p
+            }
+          } else {
+            release(&p->lock); // Keep high_p
+          }
+        }
+      } else {
+        release(&p->lock);
       }
-      release(&p->lock);
     }
+
+    // If we found a process to run
+    if(high_p != 0) {
+      // high_p lock is already held
+      p = high_p;
+      
+      p->state = RUNNING;
+      c->proc = p;
+      swtch(&c->context, &p->context);
+
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
+      release(&p->lock);
+      found = 1;
+    }
+
     if(found == 0) {
       // nothing to run; stop running on this core until an interrupt.
       asm volatile("wfi");
