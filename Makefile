@@ -148,6 +148,7 @@ UPROGS=\
 	$U/_chngpr\
 	$U/_ps\
 	$U/_aging\
+	$U/_testsched\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
