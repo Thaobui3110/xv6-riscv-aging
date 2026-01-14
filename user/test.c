@@ -114,6 +114,7 @@ void test_starvation_detection() {
         if(getpinfo(st) == 0){
             for(int i=0; i<NPROC; i++){
                 if(st->pid[i] == victim && st->starving[i]) {
+                    print_ps_table(); // Show the state that triggered success
                     printf("SUCCESS: Victim PID=%d is STARVING!\n", victim);
                     starved = 1;
                     k = 200; // Force loop exit
